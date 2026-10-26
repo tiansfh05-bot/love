@@ -223,7 +223,10 @@ class Renderer:
 
 
 def main() -> None:
-    pygame.init()
+        # Menginisialisasi Pygame tanpa mengaktifkan audio (menghindari eror dsp/sound card)
+    pygame.display.init()
+    pygame.font.init()
+
 
     # Menggunakan mode pembentukan gambar virtual di memori (Tanpa membuka jendela Windows)
     screen = pygame.Surface((CFG.width, CFG.height))
