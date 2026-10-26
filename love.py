@@ -224,15 +224,15 @@ class Renderer:
 
 
 def main() -> None:
-    # ADAPTASI 2: Mengamankan inisialisasi modul font & display tanpa subsistem audio
+    # ADAPTASI 2: Mengamankan modul font & display tanpa subsistem audio
     pygame.display.init()
     pygame.font.init()
 
-    # ADAPTASI 3: Membuat kanvas internal di memori (bukan memunculkan jendela desktop OS)
+    # ADAPTASI 3: Membuat kanvas internal di memori ( headless )
     screen = pygame.Surface((CFG.width, CFG.height))
     clock = pygame.time.Clock()
 
-    # ADAPTASI 4: Membuat elemen penampung kosong di browser web Streamlit
+    # ADAPTASI 4: Membuat penampung kosong di browser web Streamlit
     frame_holder = st.empty()
 
     font_outline = pygame.font.SysFont("arial", 20, bold=True)
@@ -310,8 +310,7 @@ glow.set_alpha(center_alpha // 5)
 screen.blit(glow, glow.get_rect(center=CFG.center))
 screen.blit(center_surf, center_surf.get_rect(center=CFG.center))
 # =========================================================================
-# ADAPTASI 5: Mengonversi kanvas Pygame menjadi array matriks gambar
-#             lalu menembakkannya langsung ke layar browser HP secara real-time
+# ADAPTASI 5: Mengirim array matriks gambar ke browser secara real-time
 # =========================================================================
 img_array = pygame.surfarray.array3d(screen)
 img_array = img_array.transpose(1, 0, 2)
