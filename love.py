@@ -298,6 +298,7 @@ def main() -> None:
             w = int(center_surf.get_width() * pulse)
             h = int(center_surf.get_height() * pulse)
 
+            # --- PERBAIKAN INDENTASI DI BAGIAN INI ---
             if w > 0 and h > 0:
 center_surf = pygame.transform.smoothscale(center_surf, (w, h))
 center_surf.set_alpha(center_alpha)
