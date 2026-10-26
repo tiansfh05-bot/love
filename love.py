@@ -4,39 +4,40 @@ import math
 import random
 import sys
 from dataclasses import dataclass
-import streamlit as st
-import time
 
-# PENTING: Mengaktifkan mode "headless" untuk Pygame agar tidak mencari monitor fisik
+# =========================================================================
+# ADAPTASI 1: Impor Streamlit & Set Mode Virtual (Headless) untuk Server
+# =========================================================================
 import os
+import streamlit as st
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 import pygame
 
-# Konfigurasi halaman Streamlit agar responsif di browser HP
+# Mengatur tampilan halaman web agar rapi saat dibuka di HP
 st.set_page_config(page_title="I love you <3", page_icon="❤️", layout="centered")
 
 @dataclass(frozen=True)
 class Config:
-    width: int = 800  # Dikecilkan sedikit agar pas saat dimuat di layar browser HP
-    height: int = 500 # Dikecilkan sedikit agar pas saat dimuat di layar browser HP
-    fps: int = 30     # Disesuaikan untuk performa web browser
+    width: int = 1900
+    height: int = 1000
+    fps: int = 120
     bg_color: tuple[int, int, int] = (15, 0, 0)
     caption: str = "I love you <3"
 
-    scale: int = 9    # Skala disesuaikan dengan ukuran layar baru
-    y_offset: int = -20
+    scale: int = 20
+    y_offset: int = -45
 
-    n_outline: int = 120
-    n_fill: int = 90
-    n_floating: int = 150 # Jumlah dikurangi agar browser HP tidak lag/patah-patah
+    n_outline: int = 160
+    n_fill: int = 130
+    n_floating: int = 1000
 
-    outline_gap: int = 14
-    fill_gap: int = 16
+    outline_gap: int = 22
+    fill_gap: int = 30
 
     frames_per_step: float = 0.5
     fill_delay_offset: int = 10
-    center_delay: int = 30
+    center_delay: int = 40
     fade_speed_min: int = 25
     fade_speed_rand: int = 10
 
@@ -223,17 +224,20 @@ class Renderer:
 
 
 def main() -> None:
-        # Menginisialisasi Pygame tanpa mengaktifkan audio (menghindari eror dsp/sound card)
+    # ADAPTASI 2: Mengamankan inisialisasi modul font & display tanpa subsistem audio
     pygame.display.init()
     pygame.font.init()
 
-
-    # Menggunakan mode pembentukan gambar virtual di memori (Tanpa membuka jendela Windows)
+    # ADAPTASI 3: Membuat kanvas internal di memori (bukan memunculkan jendela desktop OS)
     screen = pygame.Surface((CFG.width, CFG.height))
-    
-    font_outline = pygame.font.SysFont("arial", 13, bold=True)
-    font_fill = pygame.font.SysFont("arial", 11, bold=True)
-    font_center = pygame.font.SysFont("georgia", 36, bold=True)
+    clock = pygame.time.Clock()
+
+    # ADAPTASI 4: Membuat elemen penampung kosong di browser web Streamlit
+    frame_holder = st.empty()
+
+    font_outline = pygame.font.SysFont("arial", 20, bold=True)
+    font_fill = pygame.font.SysFont("arial", 17, bold=True)
+    font_center = pygame.font.SysFont("georgia", 54, bold=True)
     float_fonts = {sz: pygame.font.SysFont("arial", sz) for sz in range(10, 19)}
 
     background = pygame.Surface((CFG.width, CFG.height))
@@ -259,12 +263,9 @@ def main() -> None:
     renderer = Renderer()
 
     frame = 0
-    
-    # Elemen penampung visual di halaman web Streamlit
-    frame_holder = st.empty()
+    running = True
 
-    # Loop dijalankan sebanyak 180 frame (cukup untuk memunculkan bentuk hati & teks tengah secara penuh)
-    for _ in range(180):
+    while running:
         frame += 1
         screen.blit(background, (0, 0))
         renderer.begin_frame()
@@ -295,8 +296,9 @@ def main() -> None:
 
             center_surf = font_center.render(CFG.center_text, True, (255, 200, 200))
             w = int(center_surf.get_width() * pulse)
-h = int(center_surf.get_height() * pulse)
-if w > 0 and h > 0:
+            h = int(center_surf.get_height() * pulse)
+
+            if w > 0 and h > 0:
 center_surf = pygame.transform.smoothscale(center_surf, (w, h))
 center_surf.set_alpha(center_alpha)
 if center_alpha > 10:
@@ -307,12 +309,15 @@ center_surf,
 glow.set_alpha(center_alpha // 5)
 screen.blit(glow, glow.get_rect(center=CFG.center))
 screen.blit(center_surf, center_surf.get_rect(center=CFG.center))
-# Mengubah hasil kanvas Pygame menjadi array gambar dan mengirimkannya ke browser HP
+# =========================================================================
+# ADAPTASI 5: Mengonversi kanvas Pygame menjadi array matriks gambar
+#             lalu menembakkannya langsung ke layar browser HP secara real-time
+# =========================================================================
 img_array = pygame.surfarray.array3d(screen)
-img_array = img_array.transpose([1, 0, 2]) # Rotasi array matriks agar posisi gambar pas
+img_array = img_array.transpose(1, 0, 2)
 frame_holder.image(img_array, use_container_width=True)
-# Kecepatan transisi animasi di browser (dalam detik)
-time.sleep(0.03)
+clock.tick(CFG.fps)
+pygame.quit()
 if name == "main":
 try:
 main()
